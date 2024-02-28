@@ -5,9 +5,15 @@
 }
 
 .images__div {
-    padding: 10px;
+    margin: 15px;
+}
+
+.images__div h1 {
+    color: aliceblue;
 }
 
 body {
     background-color: #0a0a23;
+    margin: 0;
+    font-family: Helvetica;
 }
