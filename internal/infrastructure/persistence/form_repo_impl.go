@@ -21,12 +21,12 @@ func (r *FormRepo) SaveForm(form *entity.Form) (*entity.Form, map[string]string)
 	panic("implement me")
 }
 
-func (r *FormRepo) GetForm(formId int) *entity.Form {
+func (r *FormRepo) GetForm(formId int) (*entity.Form, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (r *FormRepo) GetAllForms() []entity.Form {
+func (r *FormRepo) GetAllForms() ([]entity.Form, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -36,7 +36,7 @@ func (r *FormRepo) UpdateForm(form *entity.Form) (*entity.Form, map[string]strin
 	panic("implement me")
 }
 
-func (r *FormRepo) DeleteForm(formId int) {
+func (r *FormRepo) DeleteForm(formId int) (int, error) {
 	//TODO implement me
 	panic("implement me")
 }

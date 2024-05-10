@@ -12,9 +12,9 @@ type languageApp struct {
 var _ LanguageAppInterface = &languageApp{}
 
 type LanguageAppInterface interface {
-	GetAllLanguages() []entity.Language
+	GetAllLanguages() ([]entity.Language, error)
 }
 
-func (l *languageApp) GetAllLanguages() []entity.Language {
+func (l *languageApp) GetAllLanguages() ([]entity.Language, error) {
 	return l.lr.GetAllLanguages()
 }
