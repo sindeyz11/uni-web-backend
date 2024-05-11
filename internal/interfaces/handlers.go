@@ -32,7 +32,7 @@ func Task2(w http.ResponseWriter, r *http.Request) {
 func (form *Form) Task3(w http.ResponseWriter, r *http.Request) {
 	languages, err := form.languageApp.GetAllLanguages()
 	if err != nil {
-		//todo handle this!!
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	fmt.Println(languages)

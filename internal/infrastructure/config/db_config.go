@@ -7,6 +7,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 type DatabaseConfig struct {
@@ -42,11 +43,11 @@ func (c *Config) MySqlConfig() *DatabaseConfig {
 
 func (c *Config) PostgresConfig() *DatabaseConfig {
 	return &DatabaseConfig{
-		Driver:   os.Getenv("PS_DRIVER"),
-		Username: os.Getenv("PS_USER"),
-		Password: os.Getenv("PS_PASSWORD"),
-		Port:     os.Getenv("PS_PORT"),
-		Database: os.Getenv("PS_DB"),
+		Driver:   os.Getenv("PGSQL_DRIVER"),
+		Username: os.Getenv("PGSQL_USER"),
+		Password: os.Getenv("PGSQL_PASSWORD"),
+		Port:     os.Getenv("PGSQL_PORT"),
+		Database: os.Getenv("PGSQL_DATABASE"),
 	}
 }
 
@@ -57,6 +58,27 @@ func NewMysqlConn(c *DatabaseConfig) *sql.DB {
 		c.Password,
 		c.Port,
 		c.Database))
+	if err != nil {
+		log.Fatalf("Can't open database connection, %v", err)
+		return nil
+	}
+	if err := conn.Ping(); err != nil {
+		log.Fatalf("Can't open database connection, %v", err)
+		return nil
+	}
+	return conn
+}
+
+func NewPostgresConn(c *DatabaseConfig) *sql.DB {
+	connStr := fmt.Sprintf(
+		"postgresql://%s:%s@database/%s?sslmode=disable",
+		c.Username,
+		c.Password,
+		c.Database,
+	)
+
+	conn, err := sql.Open(c.Driver, connStr)
+
 	if err != nil {
 		log.Fatalf("Can't open database connection, %v", err)
 		return nil

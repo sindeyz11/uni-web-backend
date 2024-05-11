@@ -18,8 +18,8 @@ func Run() {
 	}
 	mux := http.NewServeMux()
 
-	dbConf := config.NewConfig().MySqlConfig()
-	services, err := persistence.NewRepositories(config.NewMysqlConn(dbConf))
+	dbConf := config.NewConfig().PostgresConfig()
+	services, err := persistence.NewRepositories(config.NewPostgresConn(dbConf))
 	if err != nil {
 		log.Fatal(err)
 	}
