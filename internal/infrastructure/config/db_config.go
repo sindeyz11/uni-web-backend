@@ -52,7 +52,7 @@ func (c *Config) PostgresConfig() *DatabaseConfig {
 
 func NewMysqlConn(c *DatabaseConfig) *sql.DB {
 	conn, err := sql.Open(c.Driver, fmt.Sprintf(
-		"%s:%s@tcp(localhost:%s)/%s",
+		"%s:%s@tcp(mysql_db:%s)/%s",
 		c.Username,
 		c.Password,
 		c.Port,
