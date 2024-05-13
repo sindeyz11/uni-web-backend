@@ -30,7 +30,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./internal/infrastructure/migrations/0001_inital.up.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./internal/infrastructure/migrations/postgresql/0001_inital.up.sql:/docker-entrypoint-initdb.d/init.sql
 
 networks:
   myapp:
