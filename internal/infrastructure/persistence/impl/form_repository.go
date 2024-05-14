@@ -20,16 +20,17 @@ var _ repository.FormRepository = &FormRepo{}
 func (r *FormRepo) SaveForm(form *entity.Form, languages []int) (*entity.Form, error) {
 	// saving form
 	query := `INSERT INTO form (fio, phone, email, birthday, gender, biography)
-				VALUES ($1, $2, $3, $4, $5, $6);`
-	_, err := r.Conn.Exec(query, form.Fio, form.Phone, form.Email, form.Birthday, form.Gender, form.Biography)
+				VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
+	formId := -734
+	err := r.Conn.QueryRow(query, form.Fio, form.Phone, form.Email, form.Birthday, form.Gender, form.Biography).Scan(&formId)
 	if err != nil {
 		return nil, err
 	}
 
-	// saving languages todo form id, languages
+	// saving languages
 	var vals []interface{}
 	for _, language := range languages {
-		vals = append(vals, 7, language)
+		vals = append(vals, formId, language)
 	}
 	sqlStr := `INSERT INTO forms_languages (id_form, id_language) VALUES %s`
 	sqlStr = utils.ReplaceSQL(sqlStr, "(?, ?)", len(languages))

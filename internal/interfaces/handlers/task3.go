@@ -8,7 +8,7 @@ import (
 
 func (f *Form) Task3(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("assets/templates/task3.html"))
-	languages, err := f.languageApp.GetAllLanguages()
+	allLanguages, err := f.languageApp.GetAllLanguages()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -16,7 +16,7 @@ func (f *Form) Task3(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		data := Task3Data{
-			Languages: languages,
+			Languages: allLanguages,
 		}
 		tmpl.Execute(w, data)
 		return
@@ -29,23 +29,25 @@ func (f *Form) Task3(w http.ResponseWriter, r *http.Request) {
 			Gender:    r.PostFormValue("gender"),
 			Biography: r.PostFormValue("biography"),
 		}
-		formErrors := form.Validate([]int{1})
+		languages := entity.LanguagesParseForm(r.Form["languages"])
 
+		formErrors := form.Validate(languages)
 		var data Task3Data
-
 		if len(formErrors) > 0 {
 			data = Task3Data{
-				Languages: languages,
+				Languages: allLanguages,
 				Errors:    formErrors,
 				Message:   "Ошибка. Форма содержала неверные данные: ",
 			}
 		} else {
-			f.formApp.SaveForm(&form, []int{1, 2, 3})
+			if _, err = f.formApp.SaveForm(&form, languages); err != nil {
+				http.Error(w, err.Error(), http.StatusNotFound)
+				return
+			}
 			data = Task3Data{
 				Message: "Форма была отправлена, спасибо!",
 			}
 		}
-		// todo сохранение языков
 		tmpl.Execute(w, data)
 		return
 	}

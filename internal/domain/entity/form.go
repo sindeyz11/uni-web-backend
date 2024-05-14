@@ -15,7 +15,7 @@ type Form struct {
 func (form *Form) Validate(languages []int) map[string]string {
 	var errors = make(map[string]string)
 
-	reg := regexp.MustCompile("[a-zA-Z\\s]{1,150}")
+	reg := regexp.MustCompile("[A-zА-яёЁ\\s]{1,150}")
 	if match := reg.Match([]byte(form.Fio)); !match {
 		errors["Fio"] = "ФИО должно содержать только буквы и пробелы и быть не длиннее 150 символов"
 	}
