@@ -1,4 +1,4 @@
-package constants
+package utils
 
 const (
 	OneMinute = 1

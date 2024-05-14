@@ -1,45 +1,17 @@
-package interfaces
+package handlers
 
 import (
 	"html/template"
 	"net/http"
-	"uni-web/internal/application"
 	"uni-web/internal/domain/entity"
 )
-
-type Form struct {
-	formApp     application.FormAppInterface
-	languageApp application.LanguageAppInterface
-}
-
-func NewForm(fApp application.FormAppInterface, lApp application.LanguageAppInterface) *Form {
-	return &Form{
-		formApp:     fApp,
-		languageApp: lApp,
-	}
-}
-
-type Task3Data struct {
-	Languages []entity.Language
-	Errors    []string
-	Message   string
-}
-
-func Task1(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("assets/templates/task1.html"))
-	tmpl.Execute(w, nil)
-}
-
-func Task2(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("assets/templates/task2.html"))
-	tmpl.Execute(w, nil)
-}
 
 func (f *Form) Task3(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("assets/templates/task3.html"))
 	languages, err := f.languageApp.GetAllLanguages()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
 	if r.Method == "GET" {
@@ -62,19 +34,13 @@ func (f *Form) Task3(w http.ResponseWriter, r *http.Request) {
 		var data Task3Data
 
 		if len(formErrors) > 0 {
-			var errorMessages []string
-
-			for _, v := range formErrors {
-				errorMessages = append(errorMessages, v)
-			}
-
 			data = Task3Data{
 				Languages: languages,
-				Errors:    errorMessages,
+				Errors:    formErrors,
 				Message:   "Ошибка. Форма содержала неверные данные: ",
 			}
 		} else {
-			f.formApp.SaveForm(&form)
+			f.formApp.SaveForm(&form, []int{1, 2, 3})
 			data = Task3Data{
 				Message: "Форма была отправлена, спасибо!",
 			}

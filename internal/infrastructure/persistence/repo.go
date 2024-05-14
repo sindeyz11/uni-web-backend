@@ -3,6 +3,7 @@ package persistence
 import (
 	"database/sql"
 	"uni-web/internal/domain/repository"
+	"uni-web/internal/infrastructure/persistence/impl"
 )
 
 type Repositories struct {
@@ -13,8 +14,8 @@ type Repositories struct {
 
 func NewRepositories(conn *sql.DB) (*Repositories, error) {
 	return &Repositories{
-		Form:     NewFormRepository(conn),
-		Language: NewLanguageRepository(conn),
+		Form:     impl.NewFormRepository(conn),
+		Language: impl.NewLanguageRepository(conn),
 		Db:       conn,
 	}, nil
 }

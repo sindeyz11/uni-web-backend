@@ -5,10 +5,10 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"uni-web/internal/interfaces/handlers"
 
 	"uni-web/internal/infrastructure/config"
 	"uni-web/internal/infrastructure/persistence"
-	"uni-web/internal/interfaces"
 	"uni-web/internal/interfaces/middleware"
 )
 
@@ -25,13 +25,13 @@ func Run() {
 	}
 	defer services.Close()
 
-	formService := interfaces.NewForm(services.Form, services.Language)
+	formService := handlers.NewForm(services.Form, services.Language)
 
 	// Handler for static files
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./assets/static/"))))
 
-	mux.HandleFunc("/task1/", interfaces.Task1)
-	mux.HandleFunc("/task2/", interfaces.Task2)
+	mux.HandleFunc("/task1/", handlers.Task1)
+	mux.HandleFunc("/task2/", handlers.Task2)
 	mux.HandleFunc("/task3/", formService.Task3)
 
 	handler := middleware.Logging(mux)

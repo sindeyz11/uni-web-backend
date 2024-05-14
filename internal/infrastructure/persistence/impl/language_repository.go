@@ -1,4 +1,4 @@
-package persistence
+package impl
 
 import (
 	"database/sql"
@@ -19,7 +19,7 @@ var _ repository.LanguageRepository = &LanguageRepo{}
 func (r *LanguageRepo) GetAllLanguages() ([]entity.Language, error) {
 	// TODO ADD CACHE FOR 1 WEEK
 
-	query := `SELECT * FROM languages;`
+	query := `SELECT * FROM language;`
 	rows, err := r.Conn.Query(query)
 	if err != nil {
 		return nil, err
