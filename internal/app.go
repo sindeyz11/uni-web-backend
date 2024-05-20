@@ -33,6 +33,7 @@ func Run() {
 	mux.HandleFunc("/task1/", handlers.Task1)
 	mux.HandleFunc("/task2/", handlers.Task2)
 	mux.HandleFunc("/task3/", formService.Task3)
+	mux.HandleFunc("/task4/", formService.Task4)
 
 	handler := middleware.Logging(mux)
 

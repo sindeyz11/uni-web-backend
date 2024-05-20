@@ -6,6 +6,12 @@ import (
 	"uni-web/internal/domain/entity"
 )
 
+type Task3Data struct {
+	Languages []entity.Language
+	Errors    map[string]string
+	Message   string
+}
+
 func (f *Form) Task3(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("assets/templates/task3.html"))
 	allLanguages, err := f.languageApp.GetAllLanguages()

@@ -9,4 +9,7 @@ require (
 	github.com/urfave/negroni v1.0.0
 )
 
-require filippo.io/edwards25519 v1.1.0 // indirect
+require (
+	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/oleiade/reflections v1.0.1 // indirect
+)

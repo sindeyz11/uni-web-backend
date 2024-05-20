@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"regexp"
 	"strconv"
 )
 
@@ -18,4 +19,20 @@ func LanguagesParseForm(formLanguages []string) []int {
 		}
 	}
 	return result
+}
+
+func LanguagesParseString(languages string) ([]int, error) {
+	re := regexp.MustCompile("\\d+")
+	matches := re.FindAllString(languages, -1)
+
+	var numbers []int
+	for _, match := range matches {
+		num, err := strconv.Atoi(match)
+		if err != nil {
+			return nil, err
+		}
+		numbers = append(numbers, num)
+	}
+
+	return numbers, nil
 }

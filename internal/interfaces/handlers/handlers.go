@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"net/http"
 	"uni-web/internal/application"
-	"uni-web/internal/domain/entity"
 )
 
 type Form struct {
@@ -17,12 +16,6 @@ func NewForm(fApp application.FormAppInterface, lApp application.LanguageAppInte
 		formApp:     fApp,
 		languageApp: lApp,
 	}
-}
-
-type Task3Data struct {
-	Languages []entity.Language
-	Errors    map[string]string
-	Message   string
 }
 
 func Task1(w http.ResponseWriter, r *http.Request) {
