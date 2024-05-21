@@ -16,6 +16,73 @@ type Task5Data struct {
 	Form           entity.Form
 }
 
+func (f *Form) getHandler(r *http.Request, formLanguages []FormLanguage) (data Task5Data) {
+	formErrors := getFormErrorsFromCookies(r)
+
+	// todo somewhere here
+	if form, err := getFormFromCookies(r); err == nil {
+		for index, language := range formLanguages {
+			if slices.Contains(form.Languages, language.Id) {
+				formLanguages[index].Selected = true
+			}
+		}
+		data = Task5Data{
+			Languages: formLanguages,
+			Errors:    formErrors,
+			Message:   "Ошибка. Форма содержала неверные данные: ",
+			Form:      form,
+		}
+	} else {
+		data = Task5Data{
+			Languages: formLanguages,
+			Message:   "Ошибка. Форма содержала неверные данные: ",
+			Errors:    formErrors,
+		}
+	}
+
+	return data
+}
+
+func (f *Form) postHandler(
+	w http.ResponseWriter, r *http.Request, formLanguages []FormLanguage,
+) (data Task5Data) {
+	form := entity.GetFormFromRequest(r)
+	languages := entity.LanguagesParseForm(r.Form["languages"])
+	form.Languages = languages
+	formErrors := form.Validate(languages)
+	saveErrorsInCookies(w, r, formErrors)
+
+	if len(formErrors) > 0 {
+		for index, language := range formLanguages {
+			if slices.Contains(languages, language.Id) {
+				formLanguages[index].Selected = true
+			}
+		}
+		data = Task5Data{
+			Languages: formLanguages,
+			Errors:    formErrors,
+			Message:   "Ошибка. Форма содержала неверные данные: ",
+			Form:      form,
+		}
+	} else {
+		if _, err := f.formApp.SaveForm(&form, languages); err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		user, _ := f.userApp.CreateNewUser()
+		saveFormInCookies(w, form)
+		data = Task5Data{
+			SuccessMessage: fmt.Sprintf(
+				"Форма была отправлена, спасибо! Ваш логин: %s Ваш пароль: %s",
+				user.Login,
+				user.Password,
+			),
+		}
+	}
+
+	return data
+}
+
 func (f *Form) Task5(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost && r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -38,62 +105,11 @@ func (f *Form) Task5(w http.ResponseWriter, r *http.Request) {
 	formLanguages := convertLanguagesToFormLanguages(allLanguages)
 	var data Task5Data
 
-	if r.Method == "GET" {
-		formErrors := getFormErrorsFromCookies(r)
-
-		if form, err := getFormFromCookies(r); err == nil {
-			for index, language := range formLanguages {
-				if slices.Contains(form.Languages, language.Id) {
-					formLanguages[index].Selected = true
-				}
-			}
-			data = Task5Data{
-				Languages: formLanguages,
-				Errors:    formErrors,
-				Message:   "Ошибка. Форма содержала неверные данные: ",
-				Form:      form,
-			}
-		} else {
-			data = Task5Data{
-				Languages: formLanguages,
-				Message:   "Ошибка. Форма содержала неверные данные: ",
-				Errors:    formErrors,
-			}
-		}
+	// tired
+	if r.Method == http.MethodGet {
+		data = f.getHandler(r, formLanguages)
 	} else {
-		form := entity.GetFormFromRequest(r)
-		languages := entity.LanguagesParseForm(r.Form["languages"])
-		form.Languages = languages
-		formErrors := form.Validate(languages)
-		saveErrorsInCookies(w, r, formErrors)
-
-		if len(formErrors) > 0 {
-			for index, language := range formLanguages {
-				if slices.Contains(languages, language.Id) {
-					formLanguages[index].Selected = true
-				}
-			}
-			data = Task5Data{
-				Languages: formLanguages,
-				Errors:    formErrors,
-				Message:   "Ошибка. Форма содержала неверные данные: ",
-				Form:      form,
-			}
-		} else {
-			if _, err = f.formApp.SaveForm(&form, languages); err != nil {
-				http.Error(w, err.Error(), http.StatusBadGateway)
-				return
-			}
-			user, _ := f.userApp.CreateNewUser()
-			saveFormInCookies(w, form)
-			data = Task5Data{
-				SuccessMessage: fmt.Sprintf(
-					"Форма была отправлена, спасибо! Ваш логин: %s Ваш пароль: %s",
-					user.Login,
-					user.Password,
-				),
-			}
-		}
+		data = f.postHandler(w, r, formLanguages)
 	}
 	tmpl.Execute(w, data)
 }
