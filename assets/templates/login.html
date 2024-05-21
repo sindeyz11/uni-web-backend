@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+    <title>Login page</title>
+</head>
+<body class="login-body">
+<div class="login-container">
+    {{ if not .successMsg }}
+    <h2>Авторизация</h2>
+    <form method="POST">
+        <label>
+            <input class="login-input" type="text" placeholder="Логин" name="login" value="{{ .loginValue }}" required>
+            <small>
+                {{ if .login }}
+                Такой пользователь не существует!
+                {{ end }}
+            </small>
+        </label>
+
+        <label>
+            <input class="login-input" type="password" placeholder="Пароль" name="password" value="{{ .passwordValue }}" required>
+            <small>
+                {{ if .password }}
+                Неправильный пароль!
+                {{ end }}
+            </small>
+        </label>
+        <button class="login-button" type="submit">Войти</button>
+    </form>
+    {{ else }}
+    <p> {{ .successMsg }} </p>
+    <a href="../task5">Задание 5</a>
+    {{ end }}
+</div>
+</body>
+</html>

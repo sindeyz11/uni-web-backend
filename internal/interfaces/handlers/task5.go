@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"slices"
 	"uni-web/internal/domain/entity"
 )
 
-type Task4Data struct {
+type Task5Data struct {
 	Languages      []FormLanguage
 	Errors         map[string]string
 	Message        string
@@ -15,9 +16,15 @@ type Task4Data struct {
 	Form           entity.Form
 }
 
-func (f *Form) Task4(w http.ResponseWriter, r *http.Request) {
+func (f *Form) Task5(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost && r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	session, _ := store.Get(r, "cookie-name")
+	if auth, _ := session.Values["authenticated"].(bool); auth {
+		http.Error(w, "authorized=)", http.StatusForbidden)
 		return
 	}
 
@@ -27,9 +34,9 @@ func (f *Form) Task4(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("assets/templates/task4.html"))
+	tmpl := template.Must(template.ParseFiles("assets/templates/task5.html"))
 	formLanguages := convertLanguagesToFormLanguages(allLanguages)
-	var data Task4Data
+	var data Task5Data
 
 	if r.Method == "GET" {
 		formErrors := getFormErrorsFromCookies(r)
@@ -40,14 +47,14 @@ func (f *Form) Task4(w http.ResponseWriter, r *http.Request) {
 					formLanguages[index].Selected = true
 				}
 			}
-			data = Task4Data{
+			data = Task5Data{
 				Languages: formLanguages,
 				Errors:    formErrors,
 				Message:   "Ошибка. Форма содержала неверные данные: ",
 				Form:      form,
 			}
 		} else {
-			data = Task4Data{
+			data = Task5Data{
 				Languages: formLanguages,
 				Message:   "Ошибка. Форма содержала неверные данные: ",
 				Errors:    formErrors,
@@ -66,7 +73,7 @@ func (f *Form) Task4(w http.ResponseWriter, r *http.Request) {
 					formLanguages[index].Selected = true
 				}
 			}
-			data = Task4Data{
+			data = Task5Data{
 				Languages: formLanguages,
 				Errors:    formErrors,
 				Message:   "Ошибка. Форма содержала неверные данные: ",
@@ -77,9 +84,14 @@ func (f *Form) Task4(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusBadGateway)
 				return
 			}
+			user, _ := f.userApp.CreateNewUser()
 			saveFormInCookies(w, form)
-			data = Task4Data{
-				SuccessMessage: "Форма была отправлена, спасибо!",
+			data = Task5Data{
+				SuccessMessage: fmt.Sprintf(
+					"Форма была отправлена, спасибо! Ваш логин: %s Ваш пароль: %s",
+					user.Login,
+					user.Password,
+				),
 			}
 		}
 	}

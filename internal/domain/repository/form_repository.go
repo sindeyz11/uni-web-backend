@@ -8,4 +8,5 @@ type FormRepository interface {
 	GetAllForms() ([]entity.Form, error)
 	UpdateForm(form *entity.Form) (*entity.Form, error)
 	DeleteForm(formId int) (int, error)
+	//GetFormByUserId(userId int) (*entity.Form, error)
 }

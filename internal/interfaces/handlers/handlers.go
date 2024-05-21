@@ -9,12 +9,18 @@ import (
 type Form struct {
 	formApp     application.FormAppInterface
 	languageApp application.LanguageAppInterface
+	userApp     application.UserAppInterface
 }
 
-func NewForm(fApp application.FormAppInterface, lApp application.LanguageAppInterface) *Form {
+func NewForm(
+	fApp application.FormAppInterface,
+	lApp application.LanguageAppInterface,
+	uApp application.UserAppInterface,
+) *Form {
 	return &Form{
 		formApp:     fApp,
 		languageApp: lApp,
+		userApp:     uApp,
 	}
 }
 

@@ -22,7 +22,9 @@ func (r *FormRepo) SaveForm(form *entity.Form, languages []int) (*entity.Form, e
 	query := `INSERT INTO form (fio, phone, email, birthday, gender, biography)
 				VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
 	formId := -734
-	err := r.Conn.QueryRow(query, form.Fio, form.Phone, form.Email, form.Birthday, form.Gender, form.Biography).Scan(&formId)
+	err := r.Conn.QueryRow(query,
+		form.Fio, form.Phone, form.Email, form.Birthday, form.Gender, form.Biography,
+	).Scan(&formId)
 	if err != nil {
 		return nil, err
 	}

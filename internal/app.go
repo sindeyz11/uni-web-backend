@@ -25,7 +25,7 @@ func Run() {
 	}
 	defer services.Close()
 
-	formService := handlers.NewForm(services.Form, services.Language)
+	formService := handlers.NewForm(services.Form, services.Language, services.User)
 
 	// Handler for static files
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./assets/static/"))))
@@ -34,6 +34,9 @@ func Run() {
 	mux.HandleFunc("/task2/", handlers.Task2)
 	mux.HandleFunc("/task3/", formService.Task3)
 	mux.HandleFunc("/task4/", formService.Task4)
+	mux.HandleFunc("/task5/", formService.Task5)
+
+	mux.HandleFunc("/login/", formService.LoginHandler)
 
 	handler := middleware.Logging(mux)
 
