@@ -16,11 +16,12 @@ type Task5Data struct {
 	Form           entity.Form
 }
 
-func (f *Form) getHandler(r *http.Request, formLanguages []FormLanguage) (data Task5Data) {
-	formErrors := getFormErrorsFromCookies(r)
+func (f *Form) getHandler(w http.ResponseWriter, r *http.Request, formLanguages []FormLanguage) (data Task5Data, err error) {
+	session, _ := store.Get(r, "cookie-name")
+	if userId, _ := session.Values["user_id"]; userId != nil {
+		var form *entity.Form
+		form, _ = f.formApp.GetFormByUserId(userId.(int))
 
-	// todo somewhere here
-	if form, err := getFormFromCookies(r); err == nil {
 		for index, language := range formLanguages {
 			if slices.Contains(form.Languages, language.Id) {
 				formLanguages[index].Selected = true
@@ -28,24 +29,37 @@ func (f *Form) getHandler(r *http.Request, formLanguages []FormLanguage) (data T
 		}
 		data = Task5Data{
 			Languages: formLanguages,
-			Errors:    formErrors,
-			Message:   "Ошибка. Форма содержала неверные данные: ",
-			Form:      form,
+			Form:      *form,
 		}
 	} else {
-		data = Task5Data{
-			Languages: formLanguages,
-			Message:   "Ошибка. Форма содержала неверные данные: ",
-			Errors:    formErrors,
+		formErrors := getFormErrorsFromCookies(r)
+		if form, err := getFormFromCookies(r); err == nil {
+			for index, language := range formLanguages {
+				if slices.Contains(form.Languages, language.Id) {
+					formLanguages[index].Selected = true
+				}
+			}
+			data = Task5Data{
+				Languages: formLanguages,
+				Errors:    formErrors,
+				Message:   "Ошибка. Форма содержала неверные данные: ",
+				Form:      form,
+			}
+		} else {
+			data = Task5Data{
+				Languages: formLanguages,
+				Message:   "Ошибка. Форма содержала неверные данные: ",
+				Errors:    formErrors,
+			}
 		}
 	}
 
-	return data
+	return data, nil
 }
 
 func (f *Form) postHandler(
 	w http.ResponseWriter, r *http.Request, formLanguages []FormLanguage,
-) (data Task5Data) {
+) (data Task5Data, err error) {
 	form := entity.GetFormFromRequest(r)
 	languages := entity.LanguagesParseForm(r.Form["languages"])
 	form.Languages = languages
@@ -65,11 +79,29 @@ func (f *Form) postHandler(
 			Form:      form,
 		}
 	} else {
-		if _, err := f.formApp.SaveForm(&form, languages); err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
+		session, _ := store.Get(r, "cookie-name")
+		if userId, _ := session.Values["user_id"]; userId != nil {
+			form.UserId = userId.(int)
+			// todo оптимизировать две строки снизу =)
+			userForm, _ := f.formApp.GetFormByUserId(userId.(int))
+			form.Id = userForm.Id
+
+			_, err = f.formApp.UpdateForm(&form)
+			if err != nil {
+				return data, err
+			}
+			data = Task5Data{
+				SuccessMessage: "Форма была обновлена.",
+			}
+			return data, nil
 		}
 		user, _ := f.userApp.CreateNewUser()
+		userId := user.Id
+		f.Login(r, w, userId)
+		if _, err = f.formApp.SaveFormWithUser(&form, userId); err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return data, err
+		}
 		saveFormInCookies(w, form)
 		data = Task5Data{
 			SuccessMessage: fmt.Sprintf(
@@ -80,18 +112,12 @@ func (f *Form) postHandler(
 		}
 	}
 
-	return data
+	return data, nil
 }
 
 func (f *Form) Task5(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost && r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	session, _ := store.Get(r, "cookie-name")
-	if auth, _ := session.Values["authenticated"].(bool); auth {
-		http.Error(w, "authorized=)", http.StatusForbidden)
 		return
 	}
 
@@ -107,9 +133,15 @@ func (f *Form) Task5(w http.ResponseWriter, r *http.Request) {
 
 	// tired
 	if r.Method == http.MethodGet {
-		data = f.getHandler(r, formLanguages)
+		data, err = f.getHandler(w, r, formLanguages)
 	} else {
-		data = f.postHandler(w, r, formLanguages)
+		data, err = f.postHandler(w, r, formLanguages)
 	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	tmpl.Execute(w, data)
 }

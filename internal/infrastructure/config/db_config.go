@@ -3,6 +3,9 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"github.com/rs/zerolog"
+	sqldblogger "github.com/simukti/sqldb-logger"
+	"github.com/simukti/sqldb-logger/logadapter/zerologadapter"
 	"log"
 	"os"
 
@@ -83,6 +86,9 @@ func NewPostgresConn(c *DatabaseConfig) *sql.DB {
 		log.Fatalf("Can't open database connection, %v", err)
 		return nil
 	}
+	loggerAdapter := zerologadapter.New(zerolog.New(os.Stdout))
+	conn = sqldblogger.OpenDriver(connStr, conn.Driver(), loggerAdapter)
+
 	if err := conn.Ping(); err != nil {
 		log.Fatalf("Can't open database connection, %v", err)
 		return nil

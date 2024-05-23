@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS language;
+DROP TABLE IF EXISTS form;
+DROP TABLE IF EXISTS forms_languages;

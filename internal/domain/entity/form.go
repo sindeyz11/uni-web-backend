@@ -14,6 +14,7 @@ type Form struct {
 	Gender    string `json:"gender"`
 	Biography string `json:"biography"`
 	Languages []int  `json:"languages"`
+	UserId    int
 }
 
 func (form *Form) Validate(languages []int) map[string]string {

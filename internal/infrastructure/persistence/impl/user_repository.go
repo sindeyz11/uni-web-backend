@@ -27,13 +27,15 @@ func (r *UserRepo) CreateNewUser() (*entity.User, error) {
 	hashedPassword, err := security.HashPassword(password)
 
 	query := `INSERT INTO "user" (login, password)
-				VALUES ($1, $2);`
-	_, err = r.Conn.Exec(query,
+				VALUES ($1, $2) RETURNING id;`
+	userId := -734
+	err = r.Conn.QueryRow(query,
 		user.Login, hashedPassword,
-	)
+	).Scan(&userId)
 	if err != nil {
 		return nil, err
 	}
+	user.Id = userId
 	return &user, nil
 }
 

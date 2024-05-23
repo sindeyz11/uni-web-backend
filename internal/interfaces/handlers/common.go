@@ -86,7 +86,7 @@ func saveFormInCookies(w http.ResponseWriter, form entity.Form) {
 		fieldType := typ.Field(i)
 		//fmt.Printf("Field Name: %s, Field Value: %v\n", fieldType.Name, field.Interface())
 
-		if fieldType.Name == "Id" {
+		if fieldType.Name == "Id" || fieldType.Name == "UserId" {
 			continue
 		}
 
@@ -115,11 +115,11 @@ func getFormFromCookies(r *http.Request) (form entity.Form, err error) {
 	val := reflect.ValueOf(form)
 	typ := val.Type()
 	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+		//field := val.Field(i)
 		fieldType := typ.Field(i)
-		fmt.Printf("Field Name: %s, Field Value: %v\n", fieldType.Name, field.Interface())
+		//fmt.Printf("Field Name: %s, Field Value: %v\n", fieldType.Name, field.Interface())
 
-		if fieldType.Name == "Id" {
+		if fieldType.Name == "Id" || fieldType.Name == "UserId" {
 			continue
 		}
 

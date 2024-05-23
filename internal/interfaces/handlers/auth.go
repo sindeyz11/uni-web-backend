@@ -3,6 +3,7 @@ package handlers
 import (
 	"html/template"
 	"net/http"
+	"strings"
 	"uni-web/internal/infrastructure/security"
 
 	"github.com/gorilla/sessions"
@@ -13,8 +14,11 @@ var (
 	store = sessions.NewCookieStore(key)
 )
 
-func (f *Form) Login() {
-
+func (f *Form) Login(r *http.Request, w http.ResponseWriter, userId int) {
+	session, _ := store.Get(r, "cookie-name")
+	session.Values["authenticated"] = true
+	session.Values["user_id"] = userId
+	_ = session.Save(r, w)
 }
 
 func (f *Form) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,8 +34,8 @@ func (f *Form) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl.Execute(w, nil)
 	} else if r.Method == http.MethodPost {
 		data := make(map[string]string)
-		login := r.PostFormValue("login")
-		password := r.PostFormValue("password")
+		login := strings.TrimSpace(r.PostFormValue("login"))
+		password := strings.TrimSpace(r.PostFormValue("password"))
 		user, err := f.userApp.GetUserByLogin(login)
 
 		if err != nil {
@@ -47,9 +51,7 @@ func (f *Form) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		if len(data) == 0 {
 			data["successMsg"] = "Успех! Вы вошли!"
-			session.Values["authenticated"] = true
-			session.Values["user_id"] = user.Id
-			_ = session.Save(r, w)
+			f.Login(r, w, user.Id)
 		}
 		tmpl.Execute(w, data)
 	} else {

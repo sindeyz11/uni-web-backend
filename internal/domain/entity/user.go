@@ -14,11 +14,11 @@ type User struct {
 func GenerateRandomLogin() string {
 	chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 	length := 8
-	return utils.GenerateRandomSequence(chars, length)
+	return utils.GenerateRandomStrSequence(chars, length)
 }
 
 func GenerateRandomPassword() string {
 	chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?`~"
 	length := rand.Intn(5) + 8
-	return utils.GenerateRandomSequence(chars, length)
+	return utils.GenerateRandomStrSequence(chars, length)
 }
